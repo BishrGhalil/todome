@@ -88,7 +88,7 @@ RECDIR *recdir_open(const char *dir_path) {
 }
 
 
-bool is_valid_dir(char *dirname) {
+bool is_valid_dir(const char *dirname) {
   if (!is_hidden(dirname))
     return true;
 
@@ -100,7 +100,7 @@ bool is_valid_dir(char *dirname) {
 }
 
 
-bool is_hidden(char *dirname) {
+bool is_hidden(const char *dirname) {
   if (dirname[0] == '.')
     return true;
 

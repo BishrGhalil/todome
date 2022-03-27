@@ -47,7 +47,7 @@ void recdir_pop(RECDIR *recdir);
 RECDIR *recdir_open(const char *dir_path);
 struct dirent *recdir_read(RECDIR *recdirp, int hidden);
 void recdir_close(RECDIR *recdirp);
-bool is_valid_dir(char *dirname);
-bool is_hidden(char *dirname);
+bool is_valid_dir(const char *dirname);
+bool is_hidden(const char *dirname);
 
 #endif // RECDIR_H_
