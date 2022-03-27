@@ -1,13 +1,11 @@
 CC=gcc
 CFLAGS=-Wall -std=gnu99
 LIBS=-lpcre -lncurses -lm -lsqlite3
-SRC=main.c
+SRC=main.c recdir.c
 OBJ=${SRC:.c=.o}
 OUTPUT=todome
 
 all: todome
-
-main.o:
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $^ -o $@
