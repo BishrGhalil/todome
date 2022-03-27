@@ -31,21 +31,23 @@ char *join_path(const char *base, const char *file) {
   assert(begin != NULL);
   begin[0] = '\0';
 
-  begin = strcat(begin, base);
+  begin = strncat(begin, base, base_len);
 
   if (base[base_len - 1] != '/' && file[0] != '/') {
-    begin = strcat(begin, "/");
+    begin = strncat(begin, "/", 2);
   }
 
-  begin = strcat(begin, file);
+  begin = strncat(begin, file, file_len);
 
   return begin;
 }
+
 
 RECDIR_Frame *recdir_top(RECDIR *recdir) {
   assert(recdir->stack_size > 0);
   return &recdir->stack[recdir->stack_size - 1];
 }
+
 
 int recdir_push(RECDIR *recdir, char *path) {
   assert(recdir->stack_size < RECDIR_STACK_CAP);
@@ -60,6 +62,7 @@ int recdir_push(RECDIR *recdir, char *path) {
   return 0;
 }
 
+
 void recdir_pop(RECDIR *recdir) {
   assert(recdir->stack_size > 0);
   RECDIR_Frame *top = &recdir->stack[--recdir->stack_size];
@@ -69,6 +72,7 @@ void recdir_pop(RECDIR *recdir) {
   }
   free(top->path);
 }
+
 
 RECDIR *recdir_open(const char *dir_path) {
   RECDIR *recdir = malloc(sizeof(RECDIR));
@@ -83,6 +87,7 @@ RECDIR *recdir_open(const char *dir_path) {
   return recdir;
 }
 
+
 bool is_valid_dir(char *dirname) {
   if (!is_hidden(dirname))
     return true;
@@ -94,12 +99,14 @@ bool is_valid_dir(char *dirname) {
     return true;
 }
 
+
 bool is_hidden(char *dirname) {
   if (dirname[0] == '.')
     return true;
 
   return false;
 }
+
 
 struct dirent *recdir_read(RECDIR *recdir, int read_hidden) {
   while (recdir->stack_size > 0) {
@@ -128,6 +135,7 @@ struct dirent *recdir_read(RECDIR *recdir, int read_hidden) {
 
   return NULL;
 }
+
 
 void recdir_close(RECDIR *recdir) {
   while (recdir->stack_size > 0) {
