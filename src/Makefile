@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -std=gnu99
+CFLAGS=-Wall -std=c11
 LIBS=-lpcre -lncurses -lm -lsqlite3
 SRC=main.c recdir.c
 OBJ=${SRC:.c=.o}
@@ -20,6 +20,9 @@ uninstall:
 	rm -rf /usr/bin/$(OUTPUT)
 
 clean:
-	rm -rf $(OUTPUT) src/*.o
+	rm -rf $(OUTPUT) *.o
 
-.PHONY: clean install uninstall all
+run: todome
+	./todome
+
+.PHONY: clean install uninstall all run
