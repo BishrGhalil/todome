@@ -20,8 +20,8 @@
 #include "./recdir.h"
 #include <assert.h>
 #include <errno.h>
-#include <string.h>
 #include <stdbool.h>
+#include <string.h>
 
 char *join_path(const char *base, const char *file) {
   size_t base_len = strlen(base);
@@ -42,12 +42,10 @@ char *join_path(const char *base, const char *file) {
   return begin;
 }
 
-
 RECDIR_Frame *recdir_top(RECDIR *recdir) {
   assert(recdir->stack_size > 0);
   return &recdir->stack[recdir->stack_size - 1];
 }
-
 
 int recdir_push(RECDIR *recdir, char *path) {
   assert(recdir->stack_size < RECDIR_STACK_CAP);
@@ -62,7 +60,6 @@ int recdir_push(RECDIR *recdir, char *path) {
   return 0;
 }
 
-
 void recdir_pop(RECDIR *recdir) {
   assert(recdir->stack_size > 0);
   RECDIR_Frame *top = &recdir->stack[--recdir->stack_size];
@@ -72,7 +69,6 @@ void recdir_pop(RECDIR *recdir) {
   }
   free(top->path);
 }
-
 
 RECDIR *recdir_open(const char *dir_path) {
   RECDIR *recdir = malloc(sizeof(RECDIR));
@@ -87,18 +83,14 @@ RECDIR *recdir_open(const char *dir_path) {
   return recdir;
 }
 
-
 bool is_valid_dir(const char *dirname) {
-  if (!is_hidden(dirname))
-    return true;
-
-  else if (strcmp(dirname, ".") == 0 || strcmp(dirname, "..") == 0)
+  if ((dirname[0] == '.' && dirname[1] == '\0') ||
+      (dirname[1] == '.' && dirname[2] == '\0'))
     return false;
 
   else
     return true;
 }
-
 
 bool is_hidden(const char *dirname) {
   if (dirname[0] == '.')
@@ -106,7 +98,6 @@ bool is_hidden(const char *dirname) {
 
   return false;
 }
-
 
 struct dirent *recdir_read(RECDIR *recdir, int read_hidden) {
   while (recdir->stack_size > 0) {
@@ -123,19 +114,18 @@ struct dirent *recdir_read(RECDIR *recdir, int read_hidden) {
     } else {
 
       if (ent->d_type == DT_DIR) {
-          if ((!read_hidden && is_hidden(ent->d_name)) || !is_valid_dir(ent->d_name))
-            continue;
+        if ((!read_hidden && is_hidden(ent->d_name)) ||
+            !is_valid_dir(ent->d_name))
+          continue;
 
-          recdir_push(recdir, join_path(top->path, ent->d_name));
+        recdir_push(recdir, join_path(top->path, ent->d_name));
       } else
         return ent;
-
     }
   }
 
   return NULL;
 }
-
 
 void recdir_close(RECDIR *recdir) {
   while (recdir->stack_size > 0) {
