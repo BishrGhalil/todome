@@ -27,10 +27,9 @@
 #include "recdir.h"
 #include "search.h"
 
-int search_hidden_dirs = 1;
+int search_hiddens = 1;
 
 pcre *compile_regex(const char *regex) {
-
   pcre *re;
   const char *error;
   int erroffset;
@@ -45,18 +44,19 @@ pcre *compile_regex(const char *regex) {
 int main(int argc, char **argv) {
   (void)argc;
   (void)argv;
-  char *dir_path = "/home/bishr/Documents/c";
+  char *dir_path = "/home/bishr/Documents";
   char *regex = "TODO:";
   struct dirent *ent;
 
   RECDIR *recdir = recdir_open(dir_path);
   pcre *re = compile_regex(regex);
 
-  while ((ent = recdir_read(recdir, search_hidden_dirs))) {
+  while ((ent = recdir_read(recdir, search_hiddens))) {
     char *path = join_path(recdir_top(recdir)->path, ent->d_name);
 
     if (strgrep(path, re))
       putchar('\n');
+
     free(path);
   }
 

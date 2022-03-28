@@ -6,10 +6,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "colors.h"
+#include "config.h"
 #include "errors.h"
 
-#define OVECCOUNT 3000
+#define OVECCOUNT 3
 
 typedef struct {
   char *content;
@@ -25,11 +25,6 @@ int println(const char *src) {
   return i + 2;
 }
 
-char *strnsub(char *dest, const char *src, int start, int end) {
-  strncpy(dest, &src[start], end - start + 1);
-  return dest;
-}
-
 MAPED_FILE *map_filepath(const char *path) {
 
   int fd = open(path, O_RDONLY, S_IRUSR | S_IWUSR);
@@ -37,6 +32,8 @@ MAPED_FILE *map_filepath(const char *path) {
   MAPED_FILE *file = (MAPED_FILE *)malloc(sizeof(MAPED_FILE *));
 
   if (fd == -1 || errno == EACCES || fstat(fd, &sb) == -1 || sb.st_size < 5) {
+    free(file);
+    close(fd);
     return NULL;
   }
 
@@ -45,6 +42,7 @@ MAPED_FILE *map_filepath(const char *path) {
   close(fd);
 
   if (filebody == MAP_FAILED) {
+    free(file);
     return NULL;
   }
 
@@ -63,6 +61,7 @@ int strgrep(const char *filepath, pcre *re) {
   int rc = 0;
   int match_start = 0;
   int match_end = 0;
+  int match_len = 0;
   int tmp_len = 0;
   int matched = 0;
   char *tmp;
@@ -70,29 +69,30 @@ int strgrep(const char *filepath, pcre *re) {
 
   file = map_filepath(filepath);
   if (file == NULL) {
-    return matched;
+    errno = 0;
+    return 0;
   }
 
   tmp = (char *)file->content;
   tmp_len = strlen(tmp);
   rc = pcre_exec(re, NULL, tmp, tmp_len, 0, 0, ovector, OVECCOUNT);
+
   if (rc > 0) {
-    printf(FCOLOR_GREEN "%s\n" RESET, filepath);
-    matched = 1;
+    printf(FILENAME_COLOR "%s\n" NORMAL_COLOR, filepath);
   }
 
   while (rc > 0) {
+    matched += 1;
     match_start = ovector[0];
     match_end = ovector[1];
+    match_len = match_end - match_start;
 
-    char *dest = (char *)malloc(match_end - match_start);
-    dest = strnsub(dest, tmp, match_start, match_end - 1);
-    printf(FCOLOR_RED "%s" RESET, dest);
-    free(dest);
+    printf(TODO_COLOR "%.*s" NORMAL_COLOR, match_len, &tmp[match_start]);
 
     int startoffset = println(&tmp[match_end]) + match_start;
     rc = pcre_exec(re, NULL, tmp, tmp_len, startoffset, 0, ovector, OVECCOUNT);
   }
+
   free_mapedfile(file);
   return matched;
 }
