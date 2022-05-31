@@ -1,0 +1,2 @@
+# TODO: Make a nice threadded scanning
+// FIXMEE: Click not working when scanning
