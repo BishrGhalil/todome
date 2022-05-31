@@ -44,8 +44,8 @@ pcre *compile_regex(const char *regex) {
 int main(int argc, char **argv) {
   (void)argc;
   (void)argv;
-  char *dir_path = "/home/bishr/Documents";
-  char *regex = "TODO:";
+  char *dir_path = "./test";
+  char *regex = "(TODO+|FIXME+|BUG+|NOTE+|DONE):.+";
   struct dirent *ent;
 
   RECDIR *recdir = recdir_open(dir_path);
