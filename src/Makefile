@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -std=c11
+CFLAGS=-Wall -std=c11 -ggdb
 LIBS=-lpcre -lncurses -lm -lsqlite3
 SRC=main.c recdir.c
 OBJ=${SRC:.c=.o}
