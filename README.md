@@ -23,8 +23,23 @@ yay -S todome-git
 ## Usage
 
 ```
-Usage: todome [directory path]
+Usage: todome [OPTION...] PATH
+todome -- Language agnostic tool that collects TODOs, FIXMEs, BUGs, NOTEs and
+DONEs in the source code.
 
-Search for TODOs, FIXMEs, BUGs, NOTEs and DONEs in projects.
-Bishr Ghalil.
+  -b, --bug                  Collects BUGs
+  -d, --done                 Collects DONEs
+  -f, --fixme                Collects FIXMEs
+  -h, --hidden               Searches hidden directories and files
+  -n, --note                 Collects NOTEs
+  -o, --output[=FILE]        Output to FILE instead of standard output
+  -t, --todo                 Collects TODOs
+  -?, --help                 Give this help list
+      --usage                Give a short usage message
+  -V, --version              Print program version
+
+Mandatory or optional arguments to long options are also mandatory or optional
+for any corresponding short options.
+
+Report bugs to beshrghalil@protonmail.com.
 ```
