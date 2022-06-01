@@ -95,8 +95,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     break;
 
   case ARGP_KEY_ARG:
-    if (state->arg_num >= 2)
-      /* Too many arguments. */
+    if (state->arg_num >= 2) // Too many arguments.
       argp_usage(state);
 
     arguments->args[state->arg_num] = arg;
@@ -158,9 +157,20 @@ int main(int argc, char **argv) {
   arguments.tags.bug = 0;
   arguments.tags.note = 0;
   arguments.tags.done = 0;
+
   arguments.hidden = 0;
+
+  arguments.args[0] = NULL;
+  arguments.args[1] = NULL;
+
   arguments.dir_path = ".";
+  arguments.output_file = NULL;
+
   argp_parse(&argp, argc, argv, 0, 0, &arguments);
+
+  if (arguments.args[0]) {
+    arguments.dir_path = arguments.args[0];
+  }
 
   STRING *regex_ptrn = create_regex_pattern(arguments.tags);
   pcre *re = compile_regex(regex_ptrn->data);
@@ -168,6 +178,7 @@ int main(int argc, char **argv) {
 
   struct dirent *ent;
   RECDIR *recdir = recdir_open(arguments.dir_path);
+  errEAssert(recdir != NULL, "\'%s\' not a valid directory path\n", arguments.dir_path);
 
   while ((ent = recdir_read(recdir, arguments.hidden))) {
     char *path = join_path(recdir_top(recdir)->path, ent->d_name);

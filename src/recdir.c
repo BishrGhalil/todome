@@ -119,7 +119,8 @@ struct dirent *recdir_read(RECDIR *recdir, int read_hidden) {
             !is_valid_dir(ent->d_name))
           continue;
 
-        recdir_push(recdir, join_path(top->path, ent->d_name));
+        if (recdir_push(recdir, join_path(top->path, ent->d_name)) < 0)
+          return NULL;
       } else if (!read_hidden && is_hidden(ent->d_name))
         continue;
       else
