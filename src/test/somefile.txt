@@ -1,6 +1,6 @@
-// TODOOOOO: Just a single simple todo with c (5)
+// TODOOOOO: Just a single simple todo with c
 // TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO: Just a single simple todo with c (THE VERY VERY LONG ONE)
-BUG: Some shit need to be fixed here (1)
+BUG: Some stuff need to be fixed here (1)
 // TODOOOOOOOOOO: Just a single simple todo with c (THE MAX ONE) (10)
 # TODO???: Just a single simple todo with python (1)
 ** TODO: Just a single simple todo with haskel (1)
@@ -11,7 +11,7 @@ BUG: Some shit need to be fixed here (1)
 // FIXMEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE: Just a single simple fixme (THE VERY VERY LONG ONE)
 
 
-BUGGG: Some shit need to be fixed here (3)
+BUGGG: Some stuff need to be fixed here (3)
 NOTEEEE: This was first made to teach some c to a student (4)
 
 DONE: FIXED SOME SHIT HERE
