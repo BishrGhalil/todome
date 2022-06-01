@@ -1,4 +1,4 @@
-/* recdir - recursively get files in a directory
+/* todome - recdir - recursively get files in a directory
    Copyright (C) 2021-2021 Bishr Ghalil.
 
    This program is free software: you can redistribute it and/or modify

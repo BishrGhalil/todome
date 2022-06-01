@@ -161,6 +161,7 @@ int main(int argc, char **argv) {
   arguments.hidden = 0;
   arguments.dir_path = ".";
   argp_parse(&argp, argc, argv, 0, 0, &arguments);
+
   STRING *regex_ptrn = create_regex_pattern(arguments.tags);
   pcre *re = compile_regex(regex_ptrn->data);
   string_free(regex_ptrn);

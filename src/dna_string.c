@@ -1,4 +1,4 @@
-/* todome - search for TODOs FIXMEs BUGs and NOTEs ... in source code
+/* todome - dna_string - string implementation
    Copyright (C) 2021-2021 Bishr Ghalil.
 
    This program is free software: you can redistribute it and/or modify
