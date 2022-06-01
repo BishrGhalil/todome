@@ -71,12 +71,12 @@ void recdir_pop(RECDIR *recdir) {
   free(top->path);
 }
 
-RECDIR *recdir_open(STRING *dir_path) {
+RECDIR *recdir_open(char *dir_path) {
   RECDIR *recdir = malloc(sizeof(RECDIR));
   assert(recdir != NULL);
   memset(recdir, 0, sizeof(RECDIR));
 
-  if (recdir_push(recdir, strdup(string_data(dir_path))) < 0) {
+  if (recdir_push(recdir, strdup(dir_path)) < 0) {
     free(recdir);
     return NULL;
   }
@@ -120,7 +120,9 @@ struct dirent *recdir_read(RECDIR *recdir, int read_hidden) {
           continue;
 
         recdir_push(recdir, join_path(top->path, ent->d_name));
-      } else
+      } else if (!read_hidden && is_hidden(ent->d_name))
+        continue;
+      else
         return ent;
     }
   }

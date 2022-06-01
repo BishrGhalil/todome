@@ -46,7 +46,7 @@ RECDIR_Frame *recdir_top(RECDIR *recdir);
 int recdir_push(RECDIR *recdir, char *path);
 void recdir_pop(RECDIR *recdir);
 
-RECDIR *recdir_open(STRING *dir_path);
+RECDIR *recdir_open(char *dir_path);
 struct dirent *recdir_read(RECDIR *recdirp, int hidden);
 void recdir_close(RECDIR *recdirp);
 bool is_valid_dir(const char *dirname);
