@@ -23,6 +23,8 @@
 #include <dirent.h>
 #include <stdbool.h>
 
+#include "dna_string.h"
+
 #define RECDIR_STACK_CAP 2048
 
 #define PATH_SEP "/"
@@ -44,7 +46,7 @@ RECDIR_Frame *recdir_top(RECDIR *recdir);
 int recdir_push(RECDIR *recdir, char *path);
 void recdir_pop(RECDIR *recdir);
 
-RECDIR *recdir_open(const char *dir_path);
+RECDIR *recdir_open(STRING *dir_path);
 struct dirent *recdir_read(RECDIR *recdirp, int hidden);
 void recdir_close(RECDIR *recdirp);
 bool is_valid_dir(const char *dirname);

@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-Wall -std=c11 -ggdb
 LIBS=-lpcre -lncurses -lm -lsqlite3
-SRC=main.c recdir.c
+SRC=main.c recdir.c dna_string.c
 OBJ=${SRC:.c=.o}
 OUTPUT=todome
 

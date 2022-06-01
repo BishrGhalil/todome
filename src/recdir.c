@@ -18,6 +18,7 @@
 
 #define _DEFAULT_SOURCE
 #include "./recdir.h"
+#include "dna_string.h"
 #include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
@@ -70,12 +71,12 @@ void recdir_pop(RECDIR *recdir) {
   free(top->path);
 }
 
-RECDIR *recdir_open(const char *dir_path) {
+RECDIR *recdir_open(STRING *dir_path) {
   RECDIR *recdir = malloc(sizeof(RECDIR));
   assert(recdir != NULL);
   memset(recdir, 0, sizeof(RECDIR));
 
-  if (recdir_push(recdir, strdup(dir_path)) < 0) {
+  if (recdir_push(recdir, strdup(string_data(dir_path))) < 0) {
     free(recdir);
     return NULL;
   }
