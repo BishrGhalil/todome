@@ -71,8 +71,31 @@ void string_charr_concat(STRING *dest, char *src, size_t n) {
   }
 
   strncat(dest->data, src, n);
+  dest->len+= n;
 }
 
-char *string_data(STRING *str) {
-  return str->data;
+STRING *string_rstrip(STRING *dest, char ch) {
+  while (dest->data[dest->len - 1] == ch) {
+    dest->data[--dest->len] = '\0';
+  }
+  return dest;
 }
+
+STRING *string_lstrip(STRING *dest, char ch) {
+  int i = 0;
+  while (dest->data[i++] == ch)
+    ;
+  i -= 1;
+  STRING *tmp = string_new(&dest->data[i], dest->len - i);
+  string_free(dest);
+  dest = tmp;
+  return dest;
+}
+
+STRING *string_strip(STRING *dest, char ch) {
+  string_lstrip(dest, ch);
+  string_rstrip(dest, ch);
+  return dest;
+}
+
+char *string_data(STRING *str) { return str->data; }

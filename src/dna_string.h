@@ -38,5 +38,8 @@ void string_printinfo(STRING *str);
 void string_free(STRING *str);
 void string_concat(STRING *dest, STRING *src);
 void string_charr_concat(STRING *dest, char *src, size_t n);
+STRING *string_lstrip(STRING *dest, char ch);
+STRING *string_rstrip(STRING *dest, char ch);
+STRING *string_strip(STRING *dest, char ch);
 char *string_data(STRING *str);
 #endif
