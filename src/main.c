@@ -59,7 +59,7 @@ struct arguments {
   char *args[2]; /* path & outputfile */
   struct tags_arguments tags;
   int hidden;
-  char *output_file;
+  FILE *output_file;
   char *dir_path;
 };
 
@@ -91,11 +91,11 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     arguments->hidden = 1;
     break;
   case 'o':
-    arguments->output_file = arg;
+    arguments->output_file = fopen(arg, "w");
     break;
 
   case ARGP_KEY_ARG:
-    if (state->arg_num >= 2) // Too many arguments.
+    if (state->arg_num >= 1) // Too many arguments.
       argp_usage(state);
 
     arguments->args[state->arg_num] = arg;
@@ -164,13 +164,12 @@ int main(int argc, char **argv) {
   arguments.args[1] = NULL;
 
   arguments.dir_path = ".";
-  arguments.output_file = NULL;
+  arguments.output_file = stdout;
 
   argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
-  if (arguments.args[0]) {
+  if (arguments.args[0])
     arguments.dir_path = arguments.args[0];
-  }
 
   STRING *regex_ptrn = create_regex_pattern(arguments.tags);
   pcre *re = compile_regex(regex_ptrn->data);
@@ -178,19 +177,18 @@ int main(int argc, char **argv) {
 
   struct dirent *ent;
   RECDIR *recdir = recdir_open(arguments.dir_path);
-  errEAssert(recdir != NULL, "\'%s\' not a valid directory path\n", arguments.dir_path);
+  errEAssert(recdir != NULL, "\'%s\' not a valid directory path\n",
+             arguments.dir_path);
 
   while ((ent = recdir_read(recdir, arguments.hidden))) {
     char *path = join_path(recdir_top(recdir)->path, ent->d_name);
-
-    if (strgrep(path, re))
-      putchar('\n');
-
+    strgrep(path, re, arguments.output_file);
     free(path);
   }
 
   recdir_close(recdir);
   pcre_free(re);
   errEAssert(errno == 0, strerror(errno));
+  fclose(arguments.output_file);
   return 0;
 }

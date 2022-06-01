@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <fcntl.h>
 #include <pcre.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -26,8 +27,8 @@
 
 #include "binSTree.h"
 #include "config.h"
-#include "errors.h"
 #include "dna_string.h"
+#include "errors.h"
 #include "tag.h"
 
 #define OVECCOUNT (3 * 2)
@@ -94,55 +95,56 @@ char *get_tag_color(TAG *tag) {
   }
 }
 
-void colored_print_node(TREE_NODE *node) {
+void colored_print_node(TREE_NODE *node, FILE *fd) {
   if (!node)
     return;
   if (node->right) {
-    colored_print_node(node->right);
+    colored_print_node(node->right, fd);
   }
 
-  printf("%s%s%s%s%s", TAG_PREFIX, get_tag_color(node->tag),
-         tag_data(node->tag), RESET_COLOR, TAG_SUFFIX);
+  fprintf(fd, "%s%s%s%s%s", TAG_PREFIX, get_tag_color(node->tag),
+          tag_data(node->tag), RESET_COLOR, TAG_SUFFIX);
 
-  printf(LINE_COLOR "%s%s%s\n" RESET_COLOR, LINE_PREFIX,
-         string_data(node->line), LINE_SUFFIX);
+  fprintf(fd, LINE_COLOR "%s%s%s\n" RESET_COLOR, LINE_PREFIX,
+          string_data(node->line), LINE_SUFFIX);
 
   if (node->left) {
-    colored_print_node(node->left);
+    colored_print_node(node->left, fd);
   }
 }
 
-void print_node(TREE_NODE *node) {
+void print_node(TREE_NODE *node, FILE *fd) {
   if (!node)
     return;
   if (node->right) {
-    print_node(node->right);
+    print_node(node->right, fd);
   }
 
-  printf("%s%s%s%s%s", TAG_PREFIX, get_tag_color(node->tag),
-         tag_data(node->tag), RESET_COLOR, TAG_SUFFIX);
-
-  printf(LINE_COLOR "%s%s%s\n" RESET_COLOR, LINE_PREFIX,
-         string_data(node->line), LINE_SUFFIX);
+  fprintf(fd, "%s%s%s", TAG_PREFIX, tag_data(node->tag), TAG_SUFFIX);
+  fprintf(fd, "%s%s%s\n", LINE_PREFIX, string_data(node->line), LINE_SUFFIX);
 
   if (node->left) {
-    print_node(node->left);
+    print_node(node->left, fd);
   }
 }
 
-int strgrep(const char *filepath, pcre *re) {
+void strgrep(const char *filepath, pcre *re, FILE *fd) {
   int saved_errno = errno;
   int ovector[OVECCOUNT];
   int rc = 0;
   int tmp_len = 0;
   int matched = 0;
+  int print_colors = 1;
   char *tmp;
   MAPED_FILE *file;
+
+  if (fd != stdout)
+    print_colors = 0;
 
   file = map_filepath(filepath);
   if (file == NULL) {
     errno = saved_errno;
-    return 0;
+    return;
   }
 
   BINSTREE *tree = binstree_new();
@@ -151,8 +153,12 @@ int strgrep(const char *filepath, pcre *re) {
   rc = pcre_exec(re, NULL, tmp, tmp_len, 0, 0, ovector, OVECCOUNT);
 
   if (rc > 0) {
-    printf(FILENAME_COLOR "%s%s%s" RESET_COLOR "\n", FILE_PREFIX, filepath,
-           FILE_SUFFIX);
+    if (print_colors) {
+      fprintf(fd, FILENAME_COLOR "%s%s%s" RESET_COLOR "\n", FILE_PREFIX,
+              filepath, FILE_SUFFIX);
+    } else {
+      fprintf(fd, "%s%s%s\n", FILE_PREFIX, filepath, FILE_SUFFIX);
+    }
   }
 
   while (rc > 0) {
@@ -174,10 +180,14 @@ int strgrep(const char *filepath, pcre *re) {
   }
 
   if (tree->root) {
-    colored_print_node(tree->root);
+    if (!print_colors)
+      print_node(tree->root, fd);
+    else {
+      colored_print_node(tree->root, fd);
+    }
+    fprintf(fd, "\n");
   }
 
   binstree_free(tree);
   free_mapedfile(file);
-  return matched;
 }
