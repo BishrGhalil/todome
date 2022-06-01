@@ -20,9 +20,11 @@
 #include <fcntl.h>
 #include <pcre.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 
+#include "dna_string.h"
 #include "errors.h"
 #include "recdir.h"
 #include "search.h"
@@ -44,7 +46,13 @@ pcre *compile_regex(const char *regex) {
 int main(int argc, char **argv) {
   (void)argc;
   (void)argv;
-  char *dir_path = "./test";
+  STRING *dir_path = string_new("", 0);
+  if (argc < 2) {
+    string_charr_concat(dir_path, ".", 1);
+  } else {
+    string_charr_concat(dir_path, argv[1], strlen(argv[1]));
+  }
+
   char *regex = "(TODO+|FIXME+|BUG+|NOTE+|DONE):.+";
   struct dirent *ent;
 
@@ -60,6 +68,8 @@ int main(int argc, char **argv) {
     free(path);
   }
 
+  string_free(dir_path);
+  recdir_close(recdir);
   pcre_free(re);
   errEAssert(errno == 0, strerror(errno));
   return 0;

@@ -1,3 +1,21 @@
+/* todome - search for TODOs FIXMEs BUGs and NOTEs ... in source code
+   Copyright (C) 2021-2021 Bishr Ghalil.
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
+
+/* Written by Bishr Ghalil */
+
 #include <assert.h>
 #include <fcntl.h>
 #include <pcre.h>
@@ -6,13 +24,13 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "binSTree.h"
 #include "config.h"
 #include "errors.h"
+#include "dna_string.h"
+#include "tag.h"
 
 #define OVECCOUNT (3 * 2)
-#define MAX_TAG_LENGTH 15
-
-typedef enum { TODO, FIXME, BUG, NOTE, DONE } TAG_TYPE;
 
 typedef struct {
   char *content;
@@ -32,7 +50,7 @@ MAPED_FILE *map_filepath(const char *path) {
 
   int fd = open(path, O_RDONLY, S_IRUSR | S_IWUSR);
   struct stat sb;
-  MAPED_FILE *file = (MAPED_FILE *)malloc(sizeof(MAPED_FILE *));
+  MAPED_FILE *file = (MAPED_FILE *)malloc(sizeof(*file));
 
   if (fd == -1 || errno == EACCES || fstat(fd, &sb) == -1 || sb.st_size < 5) {
     free(file);
@@ -59,31 +77,8 @@ void free_mapedfile(MAPED_FILE *file) {
   free(file);
 }
 
-int is_valid_tag_level(int tag_len) {
-  if (tag_len > MAX_TAG_LENGTH)
-    return 0;
-  return 1;
-}
-
-TAG_TYPE get_tag_type(char *tag) {
-  switch (tag[0]) {
-  case 'T':
-    return TODO;
-  case 'F':
-    return FIXME;
-  case 'B':
-    return BUG;
-  case 'N':
-    return NOTE;
-  case 'D':
-    return DONE;
-  default:
-    return TODO;
-  }
-}
-
-char *get_tag_color(char *tag) {
-  switch (get_tag_type(tag)) {
+char *get_tag_color(TAG *tag) {
+  switch (tag->type) {
   case TODO:
     return (char *)TODO_COLOR;
   case FIXME:
@@ -96,6 +91,42 @@ char *get_tag_color(char *tag) {
     return (char *)DONE_COLOR;
   default:
     return (char *)LINE_COLOR;
+  }
+}
+
+void colored_print_node(TREE_NODE *node) {
+  if (!node)
+    return;
+  if (node->right) {
+    colored_print_node(node->right);
+  }
+
+  printf("%s%s%s%s%s", TAG_PREFIX, get_tag_color(node->tag),
+         tag_data(node->tag), RESET_COLOR, TAG_SUFFIX);
+
+  printf(LINE_COLOR "%s%s%s\n" RESET_COLOR, LINE_PREFIX,
+         string_data(node->line), LINE_SUFFIX);
+
+  if (node->left) {
+    colored_print_node(node->left);
+  }
+}
+
+void print_node(TREE_NODE *node) {
+  if (!node)
+    return;
+  if (node->right) {
+    print_node(node->right);
+  }
+
+  printf("%s%s%s%s%s", TAG_PREFIX, get_tag_color(node->tag),
+         tag_data(node->tag), RESET_COLOR, TAG_SUFFIX);
+
+  printf(LINE_COLOR "%s%s%s\n" RESET_COLOR, LINE_PREFIX,
+         string_data(node->line), LINE_SUFFIX);
+
+  if (node->left) {
+    print_node(node->left);
   }
 }
 
@@ -114,16 +145,17 @@ int strgrep(const char *filepath, pcre *re) {
     return 0;
   }
 
+  BINSTREE *tree = binstree_new();
   tmp = (char *)file->content;
   tmp_len = file->size;
   rc = pcre_exec(re, NULL, tmp, tmp_len, 0, 0, ovector, OVECCOUNT);
 
   if (rc > 0) {
-    printf(FILENAME_COLOR "%s%s%s\n" RESET_COLOR, FILE_PREFIX, filepath, FILE_SUFFIX);
+    printf(FILENAME_COLOR "%s%s%s" RESET_COLOR "\n", FILE_PREFIX, filepath,
+           FILE_SUFFIX);
   }
 
   while (rc > 0) {
-    char *tag = (char *)malloc(sizeof(char) * MAX_TAG_LENGTH + 1);
     matched += 1;
     unsigned int line_len = ovector[1] - ovector[3];
     unsigned int tag_len = ovector[3] - ovector[2];
@@ -131,19 +163,21 @@ int strgrep(const char *filepath, pcre *re) {
     if (!is_valid_tag_level(tag_len)) {
       tag_len = MAX_TAG_LENGTH;
     }
-    strncpy(tag, &tmp[ovector[2]], tag_len);
-    tag[tag_len] = '\0';
 
-    // PRINT TAG
-    printf("%s%s%s%s%s", TAG_PREFIX, get_tag_color(tag), tag, RESET_COLOR, TAG_SUFFIX);
+    STRING *tag_str = string_new(&tmp[ovector[2]], tag_len);
+    STRING *line_str = string_new(&tmp[ovector[3]], line_len);
+    TAG *tag = tag_new(tag_str, get_tag_type(tag_str->data));
+    TREE_NODE *node = tnode_new(tag, line_str);
 
-    // PRINT TODO_BODY
-    printf(LINE_COLOR "%s%.*s%s\n" RESET_COLOR, LINE_PREFIX, line_len, &tmp[ovector[3]], LINE_SUFFIX);
-
+    binstree_insert(tree, node);
     rc = pcre_exec(re, NULL, tmp, tmp_len, ovector[1], 0, ovector, OVECCOUNT);
-    free(tag);
   }
 
+  if (tree->root) {
+    colored_print_node(tree->root);
+  }
+
+  binstree_free(tree);
   free_mapedfile(file);
   return matched;
 }
