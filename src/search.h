@@ -38,15 +38,6 @@ typedef struct {
   int size;
 } MAPED_FILE;
 
-int println(const char *src) {
-  int i = 0;
-  while (src[i] != '\0' && src[i] != '\n') {
-    putchar(src[i++]);
-  }
-  putchar('\n');
-  return i + 2;
-}
-
 MAPED_FILE *map_filepath(const char *path) {
 
   int fd = open(path, O_RDONLY, S_IRUSR | S_IWUSR);
