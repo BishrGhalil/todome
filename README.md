@@ -30,9 +30,11 @@ DONEs in the source code.
   -b, --bug                  Collects BUGs
   -d, --done                 Collects DONEs
   -f, --fixme                Collects FIXMEs
-  -h, --hidden               Searches hidden directories and files
+  -h, --hidden               Searches hiddens
+  -i, --input[=FILE]         Search in a provided file
   -n, --note                 Collects NOTEs
-  -o, --output[=FILE]        Output to FILE instead of standard output
+  -o, --output[=FILE]        Output to FILE
+  -s, --no-colors            Don't output colors
   -t, --todo                 Collects TODOs
   -?, --help                 Give this help list
       --usage                Give a short usage message
