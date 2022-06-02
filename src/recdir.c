@@ -71,7 +71,7 @@ void recdir_pop(RECDIR *recdir) {
   free(top->path);
 }
 
-RECDIR *recdir_open(char *dir_path) {
+RECDIR *recdir_open(const char *dir_path) {
   RECDIR *recdir = malloc(sizeof(RECDIR));
   assert(recdir != NULL);
   memset(recdir, 0, sizeof(RECDIR));

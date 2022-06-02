@@ -17,6 +17,7 @@
 /* Written by Bishr Ghalil */
 
 #include <assert.h>
+#include <dirent.h>
 #include <fcntl.h>
 #include <pcre.h>
 #include <stdio.h>
@@ -29,9 +30,12 @@
 #include "config.h"
 #include "dna_string.h"
 #include "errors.h"
+#include "recdir.h"
 #include "tag.h"
 
 #define OVECCOUNT (3 * 2)
+
+typedef enum { SH_STOP_COLORS = 2, SH_HIDDEN = 4 } SH_OPTIONS;
 
 typedef struct {
   char *content;
@@ -119,18 +123,13 @@ void print_node(TREE_NODE *node, FILE *fd) {
   }
 }
 
-void strgrep(const char *filepath, pcre *re, FILE *fd) {
+void strgrep(const char *filepath, pcre *re, FILE *output_fd, SH_OPTIONS opt) {
   int saved_errno = errno;
   int ovector[OVECCOUNT];
   int rc = 0;
   int tmp_len = 0;
-  int matched = 0;
-  int print_colors = 1;
   char *tmp;
   MAPED_FILE *file;
-
-  if (fd != stdout)
-    print_colors = 0;
 
   file = map_filepath(filepath);
   if (file == NULL) {
@@ -144,16 +143,15 @@ void strgrep(const char *filepath, pcre *re, FILE *fd) {
   rc = pcre_exec(re, NULL, tmp, tmp_len, 0, 0, ovector, OVECCOUNT);
 
   if (rc > 0) {
-    if (print_colors) {
-      fprintf(fd, FILENAME_COLOR "%s%s%s" RESET_COLOR "\n", FILE_PREFIX,
+    if (!(opt & SH_STOP_COLORS)) {
+      fprintf(output_fd, FILENAME_COLOR "%s%s%s" RESET_COLOR "\n", FILE_PREFIX,
               filepath, FILE_SUFFIX);
     } else {
-      fprintf(fd, "%s%s%s\n", FILE_PREFIX, filepath, FILE_SUFFIX);
+      fprintf(output_fd, "%s%s%s\n", FILE_PREFIX, filepath, FILE_SUFFIX);
     }
   }
 
   while (rc > 0) {
-    matched += 1;
     unsigned int line_len = ovector[1] - ovector[3];
     unsigned int tag_len = ovector[3] - ovector[2];
 
@@ -171,14 +169,28 @@ void strgrep(const char *filepath, pcre *re, FILE *fd) {
   }
 
   if (tree->root) {
-    if (!print_colors)
-      print_node(tree->root, fd);
+    if (!(opt & SH_STOP_COLORS))
+      colored_print_node(tree->root, output_fd);
     else {
-      colored_print_node(tree->root, fd);
+      print_node(tree->root, output_fd);
     }
-    fprintf(fd, "\n");
+    fprintf(output_fd, "\n");
   }
 
   binstree_free(tree);
   free_mapedfile(file);
+}
+
+void ripgrep(const char *dir_path, pcre *re, FILE *output_fd, SH_OPTIONS opt) {
+  struct dirent *ent;
+  RECDIR *recdir = recdir_open((const char *)dir_path);
+  errEAssert(recdir != NULL, "\'%s\' not a valid directory path\n", dir_path);
+
+  while ((ent = recdir_read(recdir, opt & SH_HIDDEN))) {
+    char *path = join_path(recdir_top(recdir)->path, ent->d_name);
+    strgrep(path, re, output_fd, opt);
+    free(path);
+  }
+
+  recdir_close(recdir);
 }
