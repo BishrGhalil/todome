@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -std=c11 -ggdb
+CFLAGS=-Wall -ggdb -std=c11
 LIBS=-lpcre
 SRC=main.c recdir.c dna_string.c
 OBJ=${SRC:.c=.o}
