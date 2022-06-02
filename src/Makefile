@@ -7,8 +7,13 @@ OUTPUT=todome
 
 all: todome
 
+asprintf.o: asprintf.h
+dna_string.o: dna_string.h
+recdir.o: dna_string.o recdir.h
+main.o: search.h errors.h recdir.o dna_string.o
+
 %.o: %.c
-	$(CC) $(CFLAGS) -c $^ -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 todome: $(OBJ)
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
