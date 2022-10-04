@@ -33,6 +33,8 @@
 #include "recdir.h"
 #include "tag.h"
 
+// TODOOO: Prints the line after the tag
+
 #define OVECCOUNT (3 * 2)
 
 typedef enum { SH_STOP_COLORS = 2, SH_HIDDEN = 4 } SH_OPTIONS;

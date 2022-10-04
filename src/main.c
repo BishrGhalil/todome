@@ -57,7 +57,7 @@ static struct argp_option options[] = {
     {"note", 'n', 0, OPTION_ARG_OPTIONAL, "Collects NOTEs"},
     {"done", 'd', 0, OPTION_ARG_OPTIONAL, "Collects DONEs"},
     {"input", 'i', "FILE", OPTION_ARG_OPTIONAL, "Search in a provided file"},
-    {"hidden", 'h', 0, OPTION_ARG_OPTIONAL, "Searches hiddens"},
+    {"hidden", 'v', 0, OPTION_ARG_OPTIONAL, "Searches hiddens"},
     {"output", 'o', "FILE", OPTION_ARG_OPTIONAL, "Output to FILE"},
     {"no-colors", 's', 0, OPTION_ARG_OPTIONAL, "Don't output colors"},
     {0}};
@@ -99,7 +99,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     arguments->tags.done = 1;
     arguments->tags.argc++;
     break;
-  case 'h':
+  case 'v':
     arguments->sh_options |= SH_HIDDEN;
     break;
   case 'o':
@@ -189,6 +189,7 @@ int main(int argc, char **argv) {
   FILE *output_file;
 
   // Signals Handling
+  // FIXMEEE: cleanup searching allocations when a signal interrupt
   struct sigaction handler;
   if (sigsetjmp(env, 1) == -1)
     goto CLEAN_UP;
