@@ -30,7 +30,7 @@ DONEs in the source code.
   -b, --bug                  Collects BUGs
   -d, --done                 Collects DONEs
   -f, --fixme                Collects FIXMEs
-  -h, --hidden               Searches hiddens
+  -v, --hidden               Searches hiddens
   -i, --input[=FILE]         Search in a provided file
   -n, --note                 Collects NOTEs
   -o, --output[=FILE]        Output to FILE
